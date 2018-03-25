@@ -1,0 +1,214 @@
+<%@page import="org.we5.waterplant.javaclass.StockMaterial"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
+<%@ page import="java.util.ArrayList"%>
+<%@ page import="java.util.List"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="css/responsive.dataTables.min.css">
+<link rel="stylesheet" href="css/dataTables.bootstrap.min.css">
+
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/metisMenu.min.css">
+<link rel="stylesheet" href="css/font-awesome.min.css">
+
+<script src="external-js/jquery.min.js"></script>
+<script src="external-js/bootstrap.min.js"></script>
+<script src="external-js/jquery.dataTables.min.js"></script>
+<script src="external-js/dataTables.bootstrap.min.js"></script>
+<script src="external-js/dataTables.responsive.min.js"></script>
+<script src="external-js/metisMenu.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<title>Stock material - Water Plant</title>
+<script>
+	$(document).ready(function() {
+		
+		
+		
+		$('#masterload').load("Menu.jsp");
+		//document.getElementById("date").valueAsDate=new Date();
+		$.post("Stock",'{pageload:"getStock"}',function(response){
+				//alert(response)
+				if (response != null) {
+					$.noConflict();
+					table=$('#mytable').DataTable({
+						//destroy : true,
+						responsive : true,
+						data : response,
+						columnDefs:[
+									{	"targets":-1,
+										"data":null,
+										defaultContent:"<button type='button' class='editbutton btn btn-primary' ><span class='glyphicon glyphicon-edit'></span></button> | <button type='button' class='deletebutton btn btn-primary'><span class='glyphicon glyphicon-trash'></span></button>"
+									},
+									],
+						"pageLength" : 5,
+						"lengthMenu" : [ 5, 10, 25, 50 ]
+					});
+				}
+			});	
+		
+		$('#addstock').click(function(){
+			var data={
+					stockname:$('#stockname').val(),
+					qty:$('#qty').val(),
+					date:$('#date').val(),
+					pageload:"addstock"
+			};
+			$.post('Stock',$.param(data),function(response){
+				if(response == "1"){
+					location.reload();
+				}
+			});
+			
+		});
+		
+		$('#date').datepicker({
+		    dateFormat: 'yy-mm-dd'
+		});
+		
+		$("#date").focus(function(){
+			$("#ui-datepicker-div").css("z-index", "9999");
+	    });
+		
+		$("#addStockButton").bind("click", function(){
+			$("#editDiv").hide();
+			$("#addDiv").show();
+		});
+		$(document).on("click", ".editbutton", function(){
+			$('#myModal').modal('show');
+			var tableData = $(this).closest('tr')
+            .find('td')
+            .map(function() {
+				return $(this).text();
+				}).get(); 
+			$("#stockname").val(tableData[1]);
+			$("#qty").val(tableData[2]);  
+			$("#editDiv").show();
+			$("#addDiv").hide();
+			$("#stockId").val(tableData[0]);
+		});
+		$(document).on("click", "#editStock", function(){
+			  var data={
+					  	stockId:$("#stockId").val(),
+						stockname:$("#stockname").val(),
+						qty:$("#qty").val(),
+						pageload:"editStock"
+				};
+				$.post('Stock',$.param(data),function(response){
+					alert(response);
+					if(response == "1"){
+						location.reload();
+					}
+				});
+		});
+		$(document).on("click", ".deletebutton", function(){
+			alert("delete");
+			var tableData = $(this).closest('tr')
+            .find('td')
+            .map(function() {
+				return $(this).text();
+				}).get(); 
+			  var data={
+					  	stockId:tableData[0],
+						pageload:"deletStock"
+				};
+				$.post('Stock',$.param(data),function(response){
+					alert(response);
+					if(response == true){
+						alert("deleting record");
+						location.reload();
+					}
+				});
+		});	  		
+	});
+</script>
+</head>
+<body>
+	<div id="masterload"></div>
+	<!-- Place the code inside the below div tag -->
+
+	<div id="page-wrapper">
+		<div class="container col-md-10">
+			<div class="row panel panel-default"
+				style="margin-top: 20px; padding: 20px">
+				<br>
+				<table width="100%"
+					class="panel panel-default table table-striped table-bordered table-hover"
+					id="mytable">
+					<thead>
+						<tr>
+							<th>StockID</th>
+							<th>Stock Name</th>
+							<th>Quantity</th>
+							<th>Price</th>
+							<th>Total</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="col-md-offset-5 col-md-3">
+				<input id="addStockButton" type="button" class="btn btn-default" data-toggle="modal"
+					value="Add Stock" data-target="#myModal">
+			</div>
+			<div class="modal fade" id="myModal" role="dialog">
+				<div class="modal-dialog">
+					<div class="modal-content ">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Add Stock</h4>
+						</div>
+
+						<div class="modal-body">
+							<center>
+								<div class="input-group col-sm-8 form-group">
+									<span class="input-group-addon "><i
+										class="glyphicon glyphicon-shopping-cart"></i> </span> <input
+										class="form-control" name="StockName" size="14" id="stockname"
+										placeholder="Stock Name" required autofocus />
+								</div>
+
+								<div class="input-group col-sm-8 form-group">
+									<span class="input-group-addon "><i
+										class="glyphicon glyphicon-equalizer"></i> </span> <input
+										class="form-control" name="quantity" size="14" type="number"
+										id="qty" placeholder="Quantity" required />
+								</div>
+								<div class="input-group col-sm-8 form-group">
+									<span class="input-group-addon "><i
+										class="glyphicon glyphicon-calendar"></i> </span> <input type="date"
+										id="date" class="form-control" name="Date" size="14"
+										placeholder="Date" required />
+								</div>
+								<div>
+									<input type="hidden" id="stockId"/>
+								</div>
+							</center>
+						</div>
+						<div class="modal-footer" id="addDiv"> 
+							<button type="submit" name="Addstock" value="Addstock"
+								id="addstock" class="btn btn-info">Add</button>
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">Close</button>
+						</div>
+						<div class="modal-footer" id="editDiv">
+							<button type="button" name="editStock" value="Addstock"
+								id="editStock" class="btn btn-info">Edit</button>
+							</button>
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">Close</button>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

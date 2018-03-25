@@ -1,0 +1,63 @@
+package org.we5.waterplant.javaclass;
+
+public class StockMaterial {
+	String stockName;
+	int quantity;
+	String date;
+	double price;
+	double total;
+	int stockId;
+	
+	public StockMaterial()
+	{
+		
+	}
+
+	public StockMaterial(String stockName, int quantity, String date) {
+		super();
+		this.stockName = stockName;
+		this.quantity = quantity;
+		this.date = date;
+	}
+
+	public String getStockName() {
+		return stockName;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public double getTotal() {
+		return total;
+	}
+
+	public void setTotal(double total) {
+		this.total = total;
+	}
+
+	public void setStockName(String stockName) {
+		this.stockName = stockName;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
+	}
+
+}

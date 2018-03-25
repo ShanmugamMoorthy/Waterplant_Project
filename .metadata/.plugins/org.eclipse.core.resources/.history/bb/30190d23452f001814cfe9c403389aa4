@@ -1,0 +1,267 @@
+var app = angular.module("WaterPlant", ["angucomplete"]);
+app
+		.controller(
+				"BillingCtrl",
+				function($scope, $http) {
+					$scope.PaymentMethod=function() {
+						var parameters={'parameter': 'paymentType'};
+						$http({
+							url: 'Billing',
+							method: 'POST',
+							data : parameters,
+							datatype: 'jsonp'
+						}).then(function(response){
+							alert(""+JSON.stringify(response.data));
+							$scope.PaymentTypeArr = response.data;
+						});
+					};
+					$scope.PaymentMethod();
+//					$scope.paymentValue;
+//					$scope.getPaymentType =function(paymentType){
+//						$scope.paymentValue=paymentType;
+//						alert($scope.paymentValue);
+//					}
+					$scope.paymentValue = "";
+					$scope.getChanged = function(selectedItem){
+						$scope.paymentValue = selectedItem.id;
+						console.log(selectedItem.id);
+					}
+					
+					var parameters={'parameter': 'customerName'};
+					
+//					$scope.countries=[];
+					$http({
+						url: 'Billing',
+						method: 'POST',
+						data : parameters,
+						datatype: 'jsonp'
+					}).then(function(response){
+						$scope.countries= countries=response.data;						
+
+					});
+					
+					
+					
+					
+					/*$scope.countries = [
+			            {name: 'Afghanistan', code: 'AF'},
+			            {name: 'Aland Islands', code: 'AX'},
+			            {name: 'Albania', code: 'AL'},
+			            {name: 'Algeria', code: 'DZ'},
+			            {name: 'American Samoa', code: 'AS'},
+			            {name: 'AndorrA', code: 'AD'},
+			            {name: 'Angola', code: 'AO'},
+			            {name: 'Anguilla', code: 'AI'},
+			            {name: 'Antarctica', code: 'AQ'},
+			            {name: 'Antigua and Barbuda', code: 'AG'},
+			            {name: 'Hong Kong', code: 'HK'},
+			            {name: 'Hungary', code: 'HU'},
+			            {name: 'Iceland', code: 'IS'},
+			            {name: 'India', code: 'IN'},
+			            {name: 'Indonesia', code: 'ID'},
+			            {name: 'Isle of Man', code: 'IM'},
+			            {name: 'Israel', code: 'IL'},
+			                      {name: 'Western Sahara', code: 'EH'},
+			            {name: 'Yemen', code: 'YE'},
+			            {name: 'Zambia', code: 'ZM'},
+			            {name: 'Zimbabwe', code: 'ZW'}
+			];*/
+					
+					
+					$scope.FromServlet = function() {
+						$http.get("Billing").then(function success(response) {
+							$scope.person = response.data;
+							// this callback will be called asynchronously
+							// when the response is available
+						}, function error(response) {
+							alert(response);
+						});
+					};
+					
+					
+//					$scope.FromServlet = function() {
+//						$http.get("Billing").then(function success(response) {
+//							alert("data");
+//							$scope.person = response.data;
+//							alert(response.data);
+//							// this callback will be called asynchronously
+//							// when the response is available
+//						}, function error(response) {
+//							alert(response);
+//						});
+//					};
+
+					
+					var parameters={pageload:"getStock"};
+					$scope.Products = function() {
+						$http.get("Stock").then(function success(response) {
+							$scope.Products = response.data;
+							alert("stock res "+response);
+							// this callback will be called asynchronously
+							// when the response is available
+						}, function error(response) {
+							alert(response);
+						});
+					};
+					
+					$http({
+						url: 'Stock',
+						method: 'POST',
+						data : parameters,
+						datatype: 'jsonp'
+					}).then(function(response){
+						$scope.Products =response.data;						
+
+					});
+						
+						
+						
+					
+					/*{
+						Product_1 : {
+							name : "Product_1",
+							product : "1 litre",
+							price : "5"
+						},
+						Product_2 : {
+							name : "Product_2",
+							product : "2 Litre",
+							price : "10"
+						},
+						Product_3 : {
+							name : "Product_3",
+							product : "20 Litre",
+							price : "25"
+						}
+					};*/
+					$scope.SubTotal = function() {
+						var total = 0.00;
+						if ($scope.Quantity != null
+								&& $scope.Product.price != null) {
+							total = $scope.Quantity * $scope.Product.price;
+						}
+						return total;
+					};
+
+					$scope.GST = function() {
+						var GST = 0.00;
+						if ($scope.SubTotal != null && $scope.gst != null) {
+							GST = ($scope.SubTotal() * ($scope.gst / 100));
+							GST = GST.toFixed(2);
+						}
+						return GST;
+					};
+					$scope.GrandTotal = function() {
+						var gtotal = 0.00;
+						if ($scope.SubTotal != null && $scope.gst != null) {
+							var st = Number($scope.SubTotal());
+							var gt = Number($scope.GST());
+							gtotal = st + gt;
+							gtotal = gtotal.toFixed(2);
+						}
+						return gtotal;
+					};
+					$scope.printInfo = function() {
+
+						window.print();
+					};
+					$scope.invoice = {
+						items : [ {
+							PRoduct : 'Product',
+							PRice : 'Price',
+							QUantity : 'Quantity',
+							CUstomer : 'Customer Name',
+							GSt : 'GST',
+							GrandTotal : 'Total'
+						} ]
+					};
+
+					$scope.ToServlet = function() {
+
+						$scope.ProducTs = {
+							'Product' : $scope.Product,
+							'Product.price' : $scope.Product.price,
+							'Quantity' : $scope.Quantity,
+							'Customer' : $scope.selectedCountry.originalObject.code,
+							'gst' : $scope.gst,
+							'parameter' : "Add"
+						};
+						$http(
+								{
+									method : 'POST',
+									url : 'Billing',
+									data : {
+										"Product" : $scope.Product,
+										"Product.price" : $scope.Product.price,
+										"Quantity" : $scope.Quantity,
+										"Customer" : $scope.selectedCountry.originalObject.code,
+										"gst" : $scope.gst,
+										"GrandTotal": $scope.GrandTotal(),
+										"parameter" : "Add",
+										"payment" : $scope.paymentValue
+									},
+									headers : {
+										'Content-Type' : 'application/json;charset=utf-8;'
+									}
+								}).then(function success(data) {
+
+							$scope.message = data;
+							alert(data);
+						}, function error(response) {
+							console.log(response);
+							$scope.message = response;
+						});
+					};
+
+							$scope.addItem = function() {
+
+								$scope.invoice.items.push({
+									PRoduct : $scope.Product.name,
+									PRice : $scope.Product.price,
+									QUantity : $scope.Quantity,
+									CUstomer : $scope.selectedCountry.originalObject.code,
+									GSt : $scope.gst,
+									GrandTotal : $scope.GrandTotal(),
+									'Parameter' : "Add"
+								});
+							},
+							$scope.submitForm = function() {
+
+								// check to make sure the form is completely
+								// valid
+								if ($scope.myproduct.$valid) {
+									alert('Product has been added successfully ');
+								}
+							},
+
+							$scope.removeItem = function(index, count) {
+								if (index == 0 && count == 1) {
+									$scope.invoice.items.splice(index, 1);
+								} else {
+								}
+							},
+							$scope.remove = function(index) {
+
+								$scope.invoice.items.splice(index, 1);
+
+							},
+							$scope.total = function() {
+								var total = 0;
+								angular.forEach($scope.invoice.items, function(
+										item) {
+									total += $item.GrandTotal;
+								})
+								return total;
+							},
+							$scope.getSubTotal = function() {
+								var subtotal = 0;
+								for (var i = 0; i < $scope.invoice.items.length; i++) {
+									var line = $scope.invoice.items[i];
+
+									subtotal = (parseFloat(subtotal) + parseFloat(line.GrandTotal))
+											.toFixed(2);
+								}
+								return subtotal;
+							}
+
+				});

@@ -1,0 +1,117 @@
+package org.we5.waterplant.servlets;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONObject;
+import org.we5.waterplant.DB.ExpenseDAO;
+import org.we5.waterplant.DB.StockDB;
+
+import com.google.gson.Gson;
+
+/**
+ * Servlet implementation class Stock
+ */
+@WebServlet("/Stock")
+public class Stock extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public Stock() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		RequestDispatcher send = request.getRequestDispatcher("Stock.jsp");
+		send.forward(request, response);
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		
+		/*
+		BufferedReader br = request.getReader();
+		StringBuilder sb = new StringBuilder();
+        String str = null;
+        while ((str = br.readLine()) != null) {
+            sb.append(str);
+        }
+        System.out.println("sb ==="+sb);
+        JSONObject jObj = new JSONObject(sb.toString());
+        
+        
+        
+        if (jObj.optString("pageload") != null){
+    		if(jObj.getString("pageload").equalsIgnoreCase("getStock")) {
+    			StockDB objDb = new StockDB();
+				List<List<String>> list = objDb.getDetails();
+				response.setContentType("application/json");
+				response.setCharacterEncoding("UTF-8");
+				new Gson().toJson(list, response.getWriter());
+    		}
+        }*/
+    		
+    		
+		if (request.getParameter("pageload") != null) {
+			if (request.getParameter("pageload").equalsIgnoreCase("getStock")) {
+				System.out.println("hello");
+				StockDB objDb = new StockDB();
+				List<List<String>> list = objDb.getDetails();
+				response.setContentType("application/json");
+				response.setCharacterEncoding("UTF-8");
+				new Gson().toJson(list, response.getWriter());
+			} else if (request.getParameter("pageload").equalsIgnoreCase("addstock")) {
+				String stockname = request.getParameter("stockname");
+				int qty = Integer.parseInt(request.getParameter("qty"));
+				String date = request.getParameter("date");
+				StockDB objDb = new StockDB();
+				int result = objDb.addStock(stockname, qty, date);
+				response.setContentType("text/plain");
+				response.setCharacterEncoding("UTF-8");
+				response.getWriter().write(Integer.toString(result));
+			} else if (request.getParameter("pageload").equalsIgnoreCase("editStock")) {
+				String stockname = request.getParameter("stockname");
+				int stockId = Integer.parseInt(request.getParameter("stockId"));
+				int qty = Integer.parseInt(request.getParameter("qty"));
+				String date = request.getParameter("date");
+				StockDB objDb = new StockDB();
+				int result = objDb.updateStockById(stockId, stockname, qty, date);
+				new Gson().toJson(result, response.getWriter());
+				/*RequestDispatcher send = request
+						.getRequestDispatcher("Stock.jsp");
+				send.forward(request, response);*/
+			} else if (request.getParameter("pageload").equalsIgnoreCase("deletStock")) {
+				int stockId = Integer.parseInt(request.getParameter("stockId"));
+				StockDB stockDB = new StockDB();
+				boolean isDelete = stockDB.deleteStockById(stockId);
+				response.setContentType("application/json");
+				response.setCharacterEncoding("UTF-8");
+				new Gson().toJson(isDelete, response.getWriter());
+/*				RequestDispatcher send = request.getRequestDispatcher("Expense.jsp");
+				send.forward(request, response);
+*/			}
+		}
+
+	}
+}
