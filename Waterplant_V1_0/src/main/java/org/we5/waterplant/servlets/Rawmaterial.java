@@ -12,9 +12,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.we5.waterplant.DB.RawmaterialDB;
+import org.we5.waterplant.DB.UsedRawMaterialDB;
+import org.we5.waterplant.DB.VendorDB;
 import org.we5.waterplant.exception.WaterPlantException;
 import org.we5.waterplant.javaclass.Product;
-import org.we5.waterplant.javaclass.Vendor;
 
 import com.google.gson.Gson;
 
@@ -61,7 +62,7 @@ public class Rawmaterial extends HttpServlet {
 				new Gson().toJson(list, response.getWriter());
 
 			} else if (request.getParameter("pageload").equals("vendordropdown")) {
-				RawmaterialDB objDB = new RawmaterialDB();
+				VendorDB objDB = new VendorDB();
 				List<List<String>> result = objDB.getVendornames();
 				response.setContentType("application/json");
 				response.setCharacterEncoding("UTF-8");
@@ -81,51 +82,7 @@ public class Rawmaterial extends HttpServlet {
 				response.setCharacterEncoding("UTF-8");
 				new Gson().toJson(droplist, response.getWriter());
 
-			}
-
-			else if (request.getParameter("pageload").equals("addnewvendor")) {
-				
-				List<Vendor> vendorList=new ArrayList<Vendor>();
-				String vendorName = request.getParameter("vendorname");
-				String company = request.getParameter("companyname");
-				String email = request.getParameter("email");
-				String mobilenumber = request.getParameter("mobilenumber");
-				RawmaterialDB objDB = new RawmaterialDB();
-				vendorList = objDB.getVendorList();
-				for (Vendor vendor : vendorList) {
-					try{
-					if(vendor.getName().equalsIgnoreCase(vendorName))
-					{
-						vendor.setErrorMessage("Vendor name already exists");
-						throw new WaterPlantException("Vendor name already exists");
-					}
-					
-					if(vendor.getMobileNumber().equalsIgnoreCase(mobilenumber))
-					{
-						vendor.setErrorMessage("MobileNumber already exists");
-						throw new WaterPlantException("MobileNumber already exists");
-					}
-					
-					if(vendor.getEmail().equalsIgnoreCase(email))
-					{
-						vendor.setErrorMessage("Vendor name already exists");
-						throw new WaterPlantException("EmailId already exists");
-					}
-					}catch(WaterPlantException ex)
-					{
-						response.setContentType("application/json");
-						response.setCharacterEncoding("UTF-8");
-						new Gson().toJson(vendor, response.getWriter());
-						throw new WaterPlantException(ex.getErrorMessage());
-
-					}
-				}
-				
-				int result = objDB.newVendor(vendorName, company, email, mobilenumber);
-				response.setContentType("text/plain");
-				response.setCharacterEncoding("UTF-8");
-				response.getWriter().write(Integer.toString(result));
-			} else if (request.getParameter("pageload").equals("editcontent")) {
+			}else if (request.getParameter("pageload").equals("editcontent")) {
 				int id = Integer.parseInt(request.getParameter("rowid"));
 				System.out.println(id);
 				RawmaterialDB obj = new RawmaterialDB();
@@ -171,8 +128,6 @@ public class Rawmaterial extends HttpServlet {
 				RawmaterialDB obj = new RawmaterialDB();
 				List<Product> productList=new ArrayList<Product>();
 				productList=obj.getProductList();
-				
-				
 					for (Product product : productList) {
 					try {
 						if (product.getProd_Name().equalsIgnoreCase(Prod_Name)) {
@@ -190,7 +145,23 @@ public class Rawmaterial extends HttpServlet {
 				response.setContentType("text/plain");
 				response.setCharacterEncoding("UTF-8");
 				response.getWriter().write(Integer.toString(result));
-			}
+			} else if (request.getParameter("pageload").equals("addUsedRawMaterial")) {
+				int usedstockid=Integer.parseInt(request.getParameter("usedstockid"));
+				String usedmetrial=request.getParameter("usedmetrial");
+				int quantity=Integer.parseInt(request.getParameter("quantity"));
+				int productid=Integer.parseInt(request.getParameter("productid"));
+				UsedRawMaterialDB usedRawMaterialDB=new  UsedRawMaterialDB();
+				int result=usedRawMaterialDB.addUsedMaterial(usedstockid, usedmetrial, quantity, productid);
+				response.setContentType("text/plain");
+				response.setCharacterEncoding("UTF-8");
+				response.getWriter().write(Integer.toString(result));
+			} else if (request.getParameter("pageload").equals("getUsedRawMaterials")) {
+				UsedRawMaterialDB usedRawMaterialDB=new  UsedRawMaterialDB();
+				List<List<String>> list = usedRawMaterialDB.getUsedMaterials();
+				response.setContentType("application/json");
+				response.setCharacterEncoding("UTF-8");
+				new Gson().toJson(list, response.getWriter());
+			} 
 		}
 	}
 }
